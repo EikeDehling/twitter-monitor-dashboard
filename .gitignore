@@ -1,0 +1,8 @@
+.idea
+bin
+share
+lib
+local
+include
+web/node_modules
+web/db.sqlite3

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Keywords{% endblock %}
+{% block header %}Keywords{% endblock %}
+
+{% block content %}
+    <table>
+      <tr>
+        <th>Keywords</th>
+        <th># docs</th>
+      </tr>
+      {% for a in terms %}
+        <tr>
+          <td>{{ a.key }}</td>
+          <td>{{ a.doc_count }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+{% endblock %}

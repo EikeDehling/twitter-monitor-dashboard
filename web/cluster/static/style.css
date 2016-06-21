@@ -1,0 +1,13 @@
+table {
+   display: inline-block;
+   border-collapse: collapse;
+   margin: 10px;
+}
+
+table, td, th {
+  border: 1px solid black;
+}
+
+th {
+  background-color: lightblue;
+}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Clusters{% endblock %}
+{% block header %}Clusters{% endblock %}
+
+{% block content %}
+    <table>
+          <tr>
+            <th>Cluster name</th>
+            <th># docs</th>
+              <th>Keywords</th>
+              <th>Authors</th>
+          </tr>
+          {% for cluster in clusters %}
+            <tr>
+              <td>{{ cluster.label }}</td>
+              <td>{{ cluster.documents|length }}</td>
+              <td>
+                  {% for keyword in cluster.keywords %}
+                     {{keyword.key}} ({{keyword.doc_count}} / {{keyword.bg_count}}),
+                  {% endfor %}
+              </td>
+              <td>
+                  {% for author in cluster.authors %}
+                     {{author.key}} ({{author.doc_count}}),
+                  {% endfor %}
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+{% endblock %}

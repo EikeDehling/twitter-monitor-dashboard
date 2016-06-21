@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Top hashtags{% endblock %}
+{% block header %}Top hashtags{% endblock %}
+
+
+{% block content %}
+    <table>
+      <tr>
+        <th>Hashtag</th>
+        <th># docs</th>
+      </tr>
+      {% for a in hashtags %}
+        <tr>
+          <td>{{ a.key }}</td>
+          <td>{{ a.doc_count }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+{% endblock %}

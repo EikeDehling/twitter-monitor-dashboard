@@ -17,14 +17,12 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from cluster.views import IndexView, ClusterDataView, ChartsView, VolumeDataView, TagcloudDataView, TermsDataView, PostingsDataView
+from cluster.views import IndexView, ClusterDataView, VolumeDataView, TagcloudDataView, TermsDataView, PostingsDataView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url(r'^$', IndexView.as_view()),
-
-    url(r'^charts/$', ChartsView.as_view()),
     url(r'^data/volume/?$', VolumeDataView.as_view()),
     url(r'^data/tagcloud/?$', TagcloudDataView.as_view()),
     url(r'^data/author/?$', TermsDataView.as_view(field='user.screen_name')),

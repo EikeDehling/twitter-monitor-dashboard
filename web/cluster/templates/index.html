@@ -1,97 +1,18 @@
-{% extends "base.html" %}
 
-{% block title %}Overview{% endblock %}
-{% block header %}Overview{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Twitter dashboard</title>
+        <link rel="stylesheet" href="/static/style.css" type="text/css">
+    </head>
+    <body>
+        <h1>Twitter dashboard</h1>
 
-{% block content %}
+        <p>Please enter keywords and choose a chart type!</p>
 
-   <h3>Total {{ total }} postings found!</h3>
+       <div id="react-chart"></div>
+       <script type="text/javascript" src="/static/bundle.min.js"></script>
 
-   <table>
-      <tr>
-        <th>Author</th>
-        <th>Date</th>
-        <th>Text</th>
-      </tr>
-      {% for p in postings %}
-        <tr>
-          <td>{{ p.author }}</td>
-          <td>{{ p.created_at }}</td>
-          <td>{{ p.text }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-
-   <br>
-
-   <table>
-      <tr>
-        <th>Keywords</th>
-        <th># docs</th>
-      </tr>
-      {% for a in terms %}
-        <tr>
-          <td>{{ a.key }}</td>
-          <td>{{ a.doc_count }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-
-
-    <table>
-      <tr>
-        <th>Authors</th>
-        <th># docs</th>
-      </tr>
-      {% for a in authors %}
-        <tr>
-          <td>{{ a.key }}</td>
-          <td>{{ a.doc_count }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-
-
-    <table>
-      <tr>
-        <th>Hashtags</th>
-        <th># docs</th>
-      </tr>
-      {% for a in hashtags %}
-        <tr>
-          <td>{{ a.key }}</td>
-          <td>{{ a.doc_count }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-
-
-    <table>
-      <tr>
-        <th>Url</th>
-        <th># docs</th>
-      </tr>
-      {% for a in urls %}
-        <tr>
-          <td>{{ a.key }}</td>
-          <td>{{ a.doc_count }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-
-
-    <table>
-      <tr>
-        <th>Mentioned user</th>
-        <th># docs</th>
-      </tr>
-      {% for a in mentions %}
-        <tr>
-          <td>{{ a.key }}</td>
-          <td>{{ a.doc_count }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-
-
-{% endblock %}
+    </body>
+</html>

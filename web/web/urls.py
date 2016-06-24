@@ -17,19 +17,20 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from cluster.views import IndexView, ClusterView, PostingsView, VolumeDataView, VolumeView, TagcloudDataView, TermsDataView
+from cluster.views import IndexView, ClusterDataView, ChartsView, VolumeDataView, TagcloudDataView, TermsDataView, PostingsDataView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url(r'^$', IndexView.as_view()),
-    url(r'^clusters/$', ClusterView.as_view()),
-    url(r'^postings/$', PostingsView.as_view()),
-    url(r'^volume/$', VolumeView.as_view()),
+
+    url(r'^charts/$', ChartsView.as_view()),
     url(r'^data/volume/?$', VolumeDataView.as_view()),
     url(r'^data/tagcloud/?$', TagcloudDataView.as_view()),
     url(r'^data/author/?$', TermsDataView.as_view(field='user.screen_name')),
     url(r'^data/hashtags/?$', TermsDataView.as_view(field='entities.hashtags.text')),
     url(r'^data/urls/?$', TermsDataView.as_view(field='entities.urls.expanded_url')),
     url(r'^data/mentions/?$', TermsDataView.as_view(field='entities.user_mentions.screen_name')),
+    url(r'^data/postings/?$', PostingsDataView.as_view()),
+    url(r'^data/clusters/?$', ClusterDataView.as_view()),
 ]

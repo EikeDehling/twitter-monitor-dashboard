@@ -80,125 +80,8 @@ class IndexView(TemplateView):
         return self.render_to_response(context)
 
 
-class ClusterView(TemplateView):
-    template_name = "cluster.html"
-
-    def _determine_clusters(self, keywords):
-        request = {
-            "search_request": {
-                "query": {
-                    "terms": {
-                        "text": keywords
-                    }
-                },
-                "size": 10000
-            },
-            "query_hint": ' '.join(keywords),
-            "max_hits": 0,
-            "field_mapping": {
-                "content": ["_source.text"]
-            },
-            "algorithm": "lingo",
-            "attributes": {
-                "LingoClusteringAlgorithm.desiredClusterCountBase": 7,
-                "LingoClusteringAlgorithm.clusterMergingThreshold": 0.15,
-                "TermDocumentMatrixBuilder.maxWordDf": 0.05,
-                "DocumentAssigner.minClusterSize": 20
-            }
-        }
-        _, data = es.transport.perform_request('POST', _make_path('twitter', 'tweet', '_search_with_clusters'),
-                                               params=dict(request_timeout=120), body=request)
-        return data
-
-    def _cluster_info(self, cluster, keywords):
-        request = {
-            'query': {
-                'ids': {
-                    'values': cluster['documents']
-                 }
-             },
-             'size': 0,
-             'aggs': {
-                 'topics': {
-                     'significant_terms': {
-                         'field': 'text',
-                         'size': 10,
-                         'jlh': {},
-                         "background_filter": {
-                             'terms': {
-                                 'text': keywords
-                             }
-                         }
-                     }
-                 },
-                 'authors': {
-                     'terms': {
-                         'field': 'user.screen_name',
-                         'size': 3
-                     }
-                 },
-
-             }
-        }
-        result = es.search(body=request)
-
-        kw = result['aggregations']['topics']['buckets']
-        authors = result['aggregations']['authors']['buckets']
-
-        return kw, authors
-
-    def get(self, request, *args, **kwargs):
-        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
-        keywords = keywords.split(' ')
-
-        data = self._determine_clusters(keywords)
-
-        for cluster in data['clusters']:
-            kw, auth = self._cluster_info(cluster, keywords)
-            cluster['keywords'] = kw
-            cluster['authors'] = auth
-
-        context = dict(
-            clusters=data['clusters'],
-            keywords=' '.join(keywords)
-        )
-
-        return self.render_to_response(context)
-
-
-class PostingsView(TemplateView):
-    template_name = "postings.html"
-
-    def _postings(self, keywords):
-        request = {
-            'query': {
-                'terms': {
-                    'text': keywords
-                }
-             },
-             'size': 10
-        }
-        result = es.search(body=request)
-
-        return result['hits']
-
-    def get(self, request, *args, **kwargs):
-        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
-        keywords = keywords.split(' ')
-
-        data = self._postings(keywords)
-
-        context = dict(
-            total=data['total'],
-            postings=[dict(author=p['_source']['user']['screen_name'], created_at=p['_source']['created_at'], text=p['_source']['text']) for p in data['hits']],
-            keywords=' '.join(keywords)
-        )
-
-        return self.render_to_response(context)
-
-
-class VolumeView(TemplateView):
-    template_name = "volume.html"
+class ChartsView(TemplateView):
+    template_name = "charts.html"
 
 
 class VolumeDataView(View):
@@ -305,3 +188,89 @@ class TermsDataView(View):
         result = es.search(body=request)
 
         return JsonResponse(result['aggregations']['terms']['buckets'], safe=False)
+
+
+class PostingsDataView(View):
+    def get(self, request, *args, **kwargs):
+        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
+        keywords = keywords.split(' ')
+
+        request = {
+            'query': {
+                'terms': {
+                    'text': keywords
+                }
+             },
+             'size': 10
+        }
+        result = es.search(body=request)
+
+        return JsonResponse([dict(author=p['_source']['user']['screen_name'], created_at=p['_source']['created_at'], text=p['_source']['text']) for p in result['hits']['hits']], safe=False)
+
+
+class ClusterDataView(View):
+    def _determine_clusters(self, keywords):
+        request = {
+            "search_request": {
+                "query": {
+                    "terms": {
+                        "text": keywords
+                    }
+                },
+                "size": 10000
+            },
+            "query_hint": ' '.join(keywords),
+            "max_hits": 0,
+            "field_mapping": {
+                "content": ["_source.text"]
+            },
+            "algorithm": "lingo",
+            "attributes": {
+                "LingoClusteringAlgorithm.desiredClusterCountBase": 7,
+                "LingoClusteringAlgorithm.clusterMergingThreshold": 0.15,
+                "TermDocumentMatrixBuilder.maxWordDf": 0.05,
+                "DocumentAssigner.minClusterSize": 20
+            }
+        }
+        _, data = es.transport.perform_request('POST', _make_path('twitter', 'tweet', '_search_with_clusters'),
+                                               params=dict(request_timeout=120), body=request)
+        return data
+
+    def _cluster_info(self, cluster, keywords):
+        request = {
+            'query': {
+                'ids': {
+                    'values': cluster['documents']
+                 }
+             },
+             'size': 0,
+             'aggs': {
+                 'topics': {
+                     'significant_terms': {
+                         'field': 'text',
+                         'size': 10,
+                         'jlh': {},
+                         "background_filter": {
+                             'terms': {
+                                 'text': keywords
+                             }
+                         }
+                     }
+                 }
+             }
+        }
+        result = es.search(body=request)
+
+        return result['aggregations']['topics']['buckets']
+
+    def get(self, request, *args, **kwargs):
+        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
+        keywords = keywords.split(' ')
+
+        data = self._determine_clusters(keywords)
+
+        for cluster in data['clusters']:
+            cluster['keywords'] = self._cluster_info(cluster, keywords)
+            cluster['documents'] = len(cluster['documents'])
+
+        return JsonResponse(data['clusters'], safe=False)

@@ -75,6 +75,45 @@ var ChartThing = React.createClass({
             xAxisLabel="Time"
             xAxisTickInterval={{unit: 'hour', interval: 1}} />
         );
+
+      case 'postings':
+        return (
+            <table>
+              <tr>
+                <th>Author</th>
+                <th>Date</th>
+                <th>Text</th>
+              </tr>
+              {this.state.data.map((x, i) =>
+                <tr key={i + 1}>
+                  <td>{x['author']}</td>
+                  <td>{x['created_at']}</td>
+                  <td>{x['text']}</td>
+                </tr>
+              )}
+            </table>
+        );
+      case 'clusters':
+        return (
+            <table>
+              <tr>
+                <th>Cluster name</th>
+                <th># docs</th>
+                <th>Keywords</th>
+              </tr>
+              {this.state.data.map((x, i) =>
+                <tr key={i + 1}>
+                  <td>{x['label']}</td>
+                  <td>{x['documents']}</td>
+                  <td>
+                      {x['keywords'].map((y, j) =>
+                         <p>{y['key']}</p>
+                      )}
+                  </td>
+                </tr>
+              )}
+            </table>
+        );
       default:
         return (<table>
                   <tr>
@@ -100,7 +139,9 @@ var ChartThing = React.createClass({
           Type:
           <select name="type" value={this.state.type} onChange={this.handleTypeChange}>
             <option value="volume">Volume</option>
+            <option value="postings">Postings</option>
             <option value="tagcloud">Tagcloud</option>
+            <option value="clusters">Clusters</option>
             <option value="author">Authors</option>
             <option value="hashtags">Hashtags</option>
             <option value="urls">Links</option>

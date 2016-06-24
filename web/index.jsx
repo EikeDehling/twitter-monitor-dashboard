@@ -28,10 +28,12 @@ var ChartThing = React.createClass({
 
   handleKeywordChange(e) {
     this.setState({keywords: e.target.value});
+    this.getData()
   },
 
   handleTypeChange(e) {
     this.setState({type: e.target.value});
+    this.getData()
   },
 
   getData() {
@@ -93,13 +95,16 @@ var ChartThing = React.createClass({
   render() {
     return (
       <div>
-        <form onSubmit={this.handleSubmit} >
+        <form onSubmit={this.handleSubmit}>
           Keywords: <input name="keywords" type="text" value={this.state.keywords} onChange={this.handleKeywordChange} />
           Type:
           <select name="type" value={this.state.type} onChange={this.handleTypeChange}>
             <option value="volume">Volume</option>
             <option value="tagcloud">Tagcloud</option>
             <option value="author">Authors</option>
+            <option value="hashtags">Hashtags</option>
+            <option value="urls">Links</option>
+            <option value="mentions">Mentioned users</option>
           </select>
           <input type="submit" value="Submit" />
         </form>

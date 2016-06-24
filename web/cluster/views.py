@@ -166,187 +166,6 @@ class ClusterView(TemplateView):
         return self.render_to_response(context)
 
 
-class AuthorsView(TemplateView):
-    template_name = "authors.html"
-
-    def _top_authors(self, keywords):
-        request = {
-            'query': {
-                'terms': {
-                    'text': keywords
-                }
-             },
-             'size': 0,
-             'aggs': {
-                 'authors': {
-                     'terms': {
-                         'field': 'user.screen_name',
-                         'size': 10
-                     }
-                 }
-             }
-        }
-        result = es.search(body=request)
-
-        return result['aggregations']['authors']['buckets']
-
-    def get(self, request, *args, **kwargs):
-        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
-        keywords = keywords.split(' ')
-
-        context = dict(
-            authors=self._top_authors(keywords),
-            keywords=' '.join(keywords)
-        )
-
-        return self.render_to_response(context)
-
-
-class TermsView(TemplateView):
-    template_name = "terms.html"
-
-    def _top_terms(self, keywords):
-        request = {
-            'query': {
-                'terms': {
-                    'text': keywords
-                }
-             },
-             'size': 0,
-             'aggs': {
-                 'terms': {
-                     'significant_terms': {
-                         'field': 'text',
-                         'size': 10,
-                         'jlh': {}
-                     }
-                 }
-             }
-        }
-        result = es.search(body=request)
-
-        return result['aggregations']['terms']['buckets']
-
-    def get(self, request, *args, **kwargs):
-        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
-        keywords = keywords.split(' ')
-
-        context = dict(
-            terms=self._top_terms(keywords),
-            keywords=' '.join(keywords)
-        )
-
-        return self.render_to_response(context)
-
-
-class UrlsView(TemplateView):
-    template_name = "urls.html"
-
-    def _top_urls(self, keywords):
-        request = {
-            'query': {
-                'terms': {
-                    'text': keywords
-                }
-             },
-             'size': 0,
-             'aggs': {
-                 'urls': {
-                     'terms': {
-                         'field': 'entities.urls.expanded_url',
-                         'size': 10
-                     }
-                 }
-             }
-        }
-        result = es.search(body=request)
-
-        return result['aggregations']['urls']['buckets']
-
-    def get(self, request, *args, **kwargs):
-        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
-        keywords = keywords.split(' ')
-
-        context = dict(
-            urls=self._top_urls(keywords),
-            keywords=' '.join(keywords)
-        )
-
-        return self.render_to_response(context)
-
-
-class MentionsView(TemplateView):
-    template_name = "mentions.html"
-
-    def _top_mentions(self, keywords):
-        request = {
-            'query': {
-                'terms': {
-                    'text': keywords
-                }
-             },
-             'size': 0,
-             'aggs': {
-                 'mentions': {
-                     'terms': {
-                         'field': 'entities.user_mentions.screen_name',
-                         'size': 10
-                     }
-                 }
-             }
-        }
-        result = es.search(body=request)
-
-        return result['aggregations']['mentions']['buckets']
-
-    def get(self, request, *args, **kwargs):
-        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
-        keywords = keywords.split(' ')
-
-        context = dict(
-            mentions=self._top_mentions(keywords),
-            keywords=' '.join(keywords)
-        )
-
-        return self.render_to_response(context)
-
-
-class HashtagsView(TemplateView):
-    template_name = "tags.html"
-
-    def _top_tags(self, keywords):
-        request = {
-            'query': {
-                'terms': {
-                    'text': keywords
-                }
-             },
-             'size': 0,
-             'aggs': {
-                 'tags': {
-                     'terms': {
-                         'field': 'entities.hashtags.text',
-                         'size': 10
-                     }
-                 }
-             }
-        }
-        result = es.search(body=request)
-
-        return result['aggregations']['tags']['buckets']
-
-    def get(self, request, *args, **kwargs):
-        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
-        keywords = keywords.split(' ')
-
-        context = dict(
-            hashtags=self._top_tags(keywords),
-            keywords=' '.join(keywords)
-        )
-
-        return self.render_to_response(context)
-
-
 class PostingsView(TemplateView):
     template_name = "postings.html"
 
@@ -411,7 +230,7 @@ class VolumeDataView(View):
                 'volume': {
                     'date_histogram': {
                         'field': 'created_at',
-                        'interval': 'hour',
+                        'interval': '15m',
                         'format': 'yyyy-MM-dd HH:mm'
                     }
                 }
@@ -458,7 +277,11 @@ class TagcloudDataView(View):
 
         return JsonResponse(data, safe=False)
 
-class AuthorDataView(View):
+
+class TermsDataView(View):
+
+    field = None
+
     def get(self, request, *args, **kwargs):
         keywords = request.GET['keywords'] if request.GET else 'amsterdam'
         keywords = keywords.split(' ')
@@ -473,7 +296,7 @@ class AuthorDataView(View):
              'aggs': {
                  'terms': {
                      'terms': {
-                         'field': 'user.screen_name',
+                         'field': self.field,
                          'size': 10
                      }
                  }

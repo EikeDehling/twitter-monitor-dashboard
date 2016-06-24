@@ -6,3 +6,4 @@ local
 include
 web/node_modules
 web/db.sqlite3
+*.pyc

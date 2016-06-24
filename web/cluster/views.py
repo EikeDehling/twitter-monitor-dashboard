@@ -60,6 +60,54 @@ class VolumeDataView(View):
         return JsonResponse(data, safe=False)
 
 
+class ReachDataView(View):
+    def get(self, request, *args, **kwargs):
+        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
+        keywords = keywords.split(' ')
+
+        request = {
+            'query': {
+                'bool': {
+                    'must': [
+                        {
+                            'terms': {
+                                'text': keywords
+                            }
+                        }
+                    ]
+                }
+            },
+            'size': 0,
+            'aggs': {
+                'volume': {
+                    'date_histogram': {
+                        'field': 'created_at',
+                        'interval': '15m',
+                        'format': 'yyyy-MM-dd HH:mm'
+                    },
+                    'aggs': {
+                        'reach': {
+                            'sum': {
+                                'field': 'user.followers_count'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        result = es.search(body=request)
+
+        volumes = [{'x': bucket['key'], 'y': bucket['reach']['value']}
+                   for bucket in result['aggregations']['volume']['buckets']]
+
+        data = [{
+            'name': 'Reach',
+            'values': volumes
+        }]
+
+        return JsonResponse(data, safe=False)
+
+
 class TagcloudDataView(View):
     def get(self, request, *args, **kwargs):
         keywords = request.GET['keywords'] if request.GET else 'amsterdam'

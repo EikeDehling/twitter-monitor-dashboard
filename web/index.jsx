@@ -17,7 +17,7 @@ var ChartThing = React.createClass({
   },
 
   dataReceived(data) {
-    if (this.state.type === 'volume') {
+    if (this.state.type === 'volume' || this.state.type === 'reach') {
       for (var i = 0; i < data[0].values.length; ++i) {
         data[0].values[i].x = new Date(data[0].values[i].x);
       }
@@ -37,6 +37,7 @@ var ChartThing = React.createClass({
   },
 
   getData() {
+    this.setState({data: null});
     $.ajax({
       url: "/data/" + this.state.type,
       data: { keywords: this.state.keywords }
@@ -65,6 +66,8 @@ var ChartThing = React.createClass({
                   style={{width: 300}}
                   tags={this.state.data} />
                 );
+
+      case 'reach':
       case 'volume':
         return (
           <LineChart
@@ -93,6 +96,7 @@ var ChartThing = React.createClass({
               )}
             </table>
         );
+
       case 'clusters':
         return (
             <table>
@@ -114,6 +118,7 @@ var ChartThing = React.createClass({
               )}
             </table>
         );
+
       default:
         return (<table>
                   <tr>
@@ -139,6 +144,7 @@ var ChartThing = React.createClass({
           Type:
           <select name="type" value={this.state.type} onChange={this.handleTypeChange}>
             <option value="volume">Volume</option>
+            <option value="reach">Reach</option>
             <option value="postings">Postings</option>
             <option value="tagcloud">Tagcloud</option>
             <option value="clusters">Clusters</option>

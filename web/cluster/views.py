@@ -12,6 +12,61 @@ class IndexView(TemplateView):
     template_name = "index.html"
 
 
+class OwnOtherVolumeDataView(View):
+    def get(self, request, *args, **kwargs):
+        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
+        #keywords = keywords.split(' ')
+
+        request = {
+            'query': {
+                'range': {
+                    'created_at': {
+                        'from': "now-2d/d"
+                    }
+                }
+            },
+            'size': 0,
+            'aggs': {
+                'volume': {
+                    'date_histogram': {
+                        'field': 'created_at',
+                        'interval': 'hour',
+                        'format': 'yyyy-MM-dd HH:mm'
+                    },
+                    'aggs': {
+                        'other': {
+                            'filter': {
+                                'match': {
+                                    'text': keywords
+                                }   
+                            }
+                        },
+                        'own': {
+                            'filter': {
+                                'match': {
+                                    'user.screen_name': keywords
+                                }   
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        result = es.search(body=request)
+
+        own_volume = [{'x': bucket['key'], 'y': bucket['own']['doc_count']}
+                      for bucket in result['aggregations']['volume']['buckets']]
+
+        other_volume = [{'x': bucket['key'], 'y': bucket['other']['doc_count']}
+                        for bucket in result['aggregations']['volume']['buckets']]
+
+        data = [
+            { 'name': 'Own volume', 'values': own_volume },
+            { 'name': 'Other volume', 'values': other_volume }
+        ]
+
+        return JsonResponse(data, safe=False)
+
 class VolumeDataView(View):
     def get(self, request, *args, **kwargs):
         keywords = request.GET['keywords'] if request.GET else 'amsterdam'

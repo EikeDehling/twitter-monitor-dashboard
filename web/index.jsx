@@ -12,7 +12,7 @@ var ChartThing = React.createClass({
     return {
       data: null,
       type: 'volume',
-      keywords: 'amsterdam'
+      keywords: 'tele2nederland tele2webcare'
     };
   },
 
@@ -69,11 +69,12 @@ var ChartThing = React.createClass({
 
       case 'reach':
       case 'volume':
+      case 'own_other':
         return (
           <LineChart
             data={this.state.data}
             width={600} height={400}
-            title="Volume data"
+            title="Own vs other volume"
             yAxisLabel="Volume"
             xAxisLabel="Time"
             xAxisTickInterval={{unit: 'hour', interval: 1}} />
@@ -152,6 +153,7 @@ var ChartThing = React.createClass({
             <option value="hashtags">Hashtags</option>
             <option value="urls">Links</option>
             <option value="mentions">Mentioned users</option>
+            <option value="own_other">Own vs other volume</option>
           </select>
           <input type="submit" value="Submit" />
         </form>

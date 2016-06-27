@@ -61,8 +61,8 @@ class OwnOtherVolumeDataView(View):
                         for bucket in result['aggregations']['volume']['buckets']]
 
         data = [
-            { 'name': 'Own volume', 'values': own_volume },
-            { 'name': 'Other volume', 'values': other_volume }
+            {'name': 'Own volume', 'values': own_volume},
+            {'name': 'Other volume', 'values': other_volume}
         ]
 
         return JsonResponse(data, safe=False)
@@ -96,7 +96,7 @@ class VolumeDataView(View):
                 'volume': {
                     'date_histogram': {
                         'field': 'created_at',
-                        'interval': '15m',
+                        'interval': 'hour',
                         'format': 'yyyy-MM-dd HH:mm'
                     }
                 }
@@ -128,6 +128,13 @@ class ReachDataView(View):
                             'terms': {
                                 'text': keywords
                             }
+                        },
+                        {
+                            'range': {
+                                'created_at': {
+                                    'from': "now-2d/d"
+                                }
+                            }
                         }
                     ]
                 }
@@ -137,7 +144,7 @@ class ReachDataView(View):
                 'volume': {
                     'date_histogram': {
                         'field': 'created_at',
-                        'interval': '15m',
+                        'interval': 'hour',
                         'format': 'yyyy-MM-dd HH:mm'
                     },
                     'aggs': {
@@ -305,3 +312,59 @@ class ClusterDataView(View):
             cluster['documents'] = len(cluster['documents'])
 
         return JsonResponse(data['clusters'], safe=False)
+
+
+class UniqueAuthorsDataView(View):
+    def get(self, request, *args, **kwargs):
+        keywords = request.GET['keywords'] if request.GET else 'amsterdam'
+        keywords = keywords.split(' ')
+
+        request = {
+            'query': {
+                'bool': {
+                    'must': [
+                        {
+                            'terms': {
+                                'text': keywords
+                            }
+                        },
+                        {
+                            'range': {
+                                'created_at': {
+                                    'from': "now-2d/d"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            'size': 0,
+            'aggs': {
+                'volume': {
+                    'date_histogram': {
+                        'field': 'created_at',
+                        'interval': '6h',
+                        'format': 'yyyy-MM-dd HH:mm'
+                    },
+                    'aggs': {
+                        'unique_authors': {
+                             'cardinality': {
+                                 'field': 'user.screen_name',
+                                 'precision_threshold': 100
+                             }
+                        }
+                    }
+                }
+            }
+        }
+        result = es.search(body=request)
+
+        unique_authors = [{'x': bucket['key'], 'y': bucket['unique_authors']['value']}
+                          for bucket in result['aggregations']['volume']['buckets']]
+
+        data = [{
+            'name': 'Unique authors',
+            'values': unique_authors
+        }]
+
+        return JsonResponse(data, safe=False)

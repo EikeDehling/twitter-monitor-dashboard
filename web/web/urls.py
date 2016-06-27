@@ -19,7 +19,7 @@ from django.contrib import admin
 
 from cluster.views import IndexView, ClusterDataView, VolumeDataView,\
     TagcloudDataView, TermsDataView, PostingsDataView, ReachDataView,\
-    OwnOtherVolumeDataView
+    OwnOtherVolumeDataView, UniqueAuthorsDataView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -35,4 +35,5 @@ urlpatterns = [
     url(r'^data/mentions/?$', TermsDataView.as_view(field='entities.user_mentions.screen_name')),
     url(r'^data/postings/?$', PostingsDataView.as_view()),
     url(r'^data/clusters/?$', ClusterDataView.as_view()),
+    url(r'^data/unique_authors/?$', UniqueAuthorsDataView.as_view()),
 ]

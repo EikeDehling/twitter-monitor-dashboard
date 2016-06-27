@@ -17,7 +17,8 @@ var ChartThing = React.createClass({
   },
 
   dataReceived(data) {
-    if (this.state.type === 'volume' || this.state.type === 'reach') {
+    if (this.state.type === 'volume' || this.state.type === 'reach' ||
+        this.state.type === 'unique_authors' || this.state.type === 'own_other') {
       for (var i = 0; i < data[0].values.length; ++i) {
         data[0].values[i].x = new Date(data[0].values[i].x);
       }
@@ -70,15 +71,18 @@ var ChartThing = React.createClass({
       case 'reach':
       case 'volume':
       case 'own_other':
+      case 'unique_authors':
         return (
           <LineChart
             data={this.state.data}
             width={600} height={400}
-            title="Own vs other volume"
+            title="Volume"
             yAxisLabel="Volume"
             xAxisLabel="Time"
-            xAxisTickInterval={{unit: 'hour', interval: 1}} />
+             />
         );
+
+        /* xAxisTickInterval={{unit: 'hour', interval: 1}} */
 
       case 'postings':
         return (
@@ -154,6 +158,7 @@ var ChartThing = React.createClass({
             <option value="urls">Links</option>
             <option value="mentions">Mentioned users</option>
             <option value="own_other">Own vs other volume</option>
+            <option value="unique_authors">Unique authors</option>
           </select>
           <input type="submit" value="Submit" />
         </form>
